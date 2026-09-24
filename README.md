@@ -59,24 +59,24 @@
 
 ### `search_listings`
 
-- **What it does:**
-- **Inputs:** <!-- name and type each: `max_price` (float), not "a price" -->
-- **Returns:**
-- **When it has nothing:**
+- **What it does:** Searches the available thrift listings for items matching the user's description, with optional size and maximum-price filters. Size matching is case-insensitive and matches complete size tokens, so a size like `M` can match `M` or `S/M` without incorrectly matching unrelated sizes.
+- **Inputs:** `description` (str), `size` (str or None), `max_price` (float or None)
+- **Returns:** A list of matching listing dictionaries, ordered with the best keyword match first and limited to the configured search result limit. Each dictionary contains the listing's item details such as title, size, price, style tags, brand, and platform.
+- **When it has nothing:** Returns an empty list `[]`.
 
 ### `suggest_outfit`
 
-- **What it does:**
-- **Inputs:**
-- **Returns:**
-- **When it has nothing:**
+- **What it does:** Suggests one or two ways to style the new thrifted item using pieces from the user's existing wardrobe.
+- **Inputs:** `new_item` (dict), `wardrobe` (dict)
+- **Returns:** A non-empty string containing outfit suggestions that use the new item and, when available, specific pieces from the user's wardrobe.
+- **When it has nothing:** If the wardrobe contains no items, returns general styling advice for the new item instead of failing or returning an empty string.
 
 ### `create_fit_card`
 
-- **What it does:**
-- **Inputs:**
-- **Returns:**
-- **When it has nothing:**
+- **What it does:** Creates a short, post-style caption for the thrift find using the selected item and outfit suggestion.
+- **Inputs:** `outfit` (str), `new_item` (dict)
+- **Returns:** A two-to-four sentence caption that mentions the item, price, and platform and describes the outfit's vibe.
+- **When it has nothing:** If `outfit` is empty or whitespace, returns a descriptive message instead of raising an error.
 
 ---
 
