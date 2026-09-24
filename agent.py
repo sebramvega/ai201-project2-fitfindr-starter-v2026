@@ -13,6 +13,8 @@ Build and test your three tools in `tools.py` first. Then come here.
     python agent.py          runs both example paths below
 """
 
+import re
+
 import config
 import trace
 from tools import search_listings, suggest_outfit, create_fit_card
@@ -108,7 +110,66 @@ def run_agent(query: str, wardrobe: dict) -> dict:
     session = new_session(query, wardrobe)
 
     # TODO: delete these two lines and build the loop.
-    session["error"] = "The planning loop isn't built yet — see the TODO in agent.py."
+    size_match = re.search(r"\bsize\s+([A-Za-z0-9/]+)", query, re.IGNORECASE)
+    price_match = re.search(r"\bunder\s+\$?(\d+(?:\.\d{1,2})?)", query, re.IGNORECASE)
+
+    size = size_match.group(1) if size_match else None
+    max_price = float(price_match.group(1)) if price_match else None
+
+    description = re.sub(
+        r"\bsize\s+[A-Za-z0-9/]+",
+        "",
+        query,
+        flags=re.IGNORECASE,
+    )
+    description = re.sub(
+        r"\bunder\s+\$?\d+(?:\.\d{1,2})?",
+        "",
+        description,
+        flags=re.IGNORECASE,
+    )
+    description = " ".join(description.split()).strip(" ,")
+
+    session["parsed"] = {
+        "description": description,
+        "size": size,
+        "max_price": max_price,
+    }
+
+    iteration = 1
+    trace.check_iterations(iteration)
+
+    session["search_results"] = search_listings(
+        session["parsed"]["description"],
+        session["parsed"]["size"],
+        session["parsed"]["max_price"],
+    )
+
+    if not session["search_results"]:
+        session["error"] = (
+            "I couldn't find a matching item. Try increasing your budget, "
+            "changing the size, or using a broader description."
+        )
+        return session
+
+    session["selected_item"] = session["search_results"][0]
+
+    iteration += 1
+    trace.check_iterations(iteration)
+
+    session["outfit_suggestion"] = suggest_outfit(
+        session["selected_item"],
+        session["wardrobe"],
+    )
+
+    iteration += 1
+    trace.check_iterations(iteration)
+
+    session["fit_card"] = create_fit_card(
+        session["outfit_suggestion"],
+        session["selected_item"],
+    )
+
     return session
 
 
