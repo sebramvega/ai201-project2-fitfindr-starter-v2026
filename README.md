@@ -170,17 +170,46 @@ Scored these vintage Levi's 501 jeans for just $38.00 on Depop and I'm honestly 
 
 | Criterion | Target | Try 1 | Try 2 | Try 3 | Try 4 | Try 5 | Verdict |
 |---|---|---|---|---|---|---|---|
-| 1.  |  |  |  |  |  |  |  |
-| 2.  |  |  |  |  |  |  |  |
-| 3.  |  |  |  |  |  |  |  |
-| 4.  |  |  |  |  |  |  |  |
-| 5.  |  |  |  |  |  |  |  |
+| 1. Matching query completes all three tools | 4 of 5 | PASS | PASS | PASS | PASS | PASS | MET (5/5) |
+| 2. Impossible query stops before the second tool | 5 of 5 | PASS | PASS | PASS | PASS | PASS | MET (5/5) |
+| 3. The selected item persists through session state | 5 of 5 | PASS | PASS | PASS | PASS | PASS | MET (5/5) |
+| 4. The fit card includes the find's key details | 4 of 5 | PASS | PASS | PASS | PASS | PASS | MET (5/5) |
+| 5. Search respects the maximum price | 5 of 5 | PASS | PASS | PASS | PASS | PASS | MET (5/5) |
 
-**Real output from one try**, pasted as text, naming the file and function
-that produced it:
+**Real output from one try**
 
-```
+Produced by `run_eval.py::main`, running `agent.py::run_agent`.
 
+```text
+Criterion 1:
+[1] search_listings (via MCP)
+      out: 10 items: Y2K Baby Tee — Butterfly Print, Graphic Tee — 2003 Tour Bootleg Style, Vintage Band Tee — Faded Grey … +7 more
+      →    match found, continuing
+[2] suggest_outfit
+      in:  session selected_item id=lst_002; item passed to suggest_outfit id=lst_002
+[3] create_fit_card
+      out: Just scored this adorable Y2K Baby Tee on Depop for only $18...
+
+Criterion 2:
+[1] search_listings (via MCP)
+      out: [] (empty)
+      →    branch: empty, stopping
+
+Criterion 3:
+[2] suggest_outfit
+      in:  session selected_item id=lst_007; item passed to suggest_outfit id=lst_007
+
+Criterion 4:
+Fit card:
+Finally scored this Y2K Baby Tee with the cutest butterfly print for just $18.00 on Depop...
+
+Criterion 5:
+Five MCP checks with max_price=20.0 returned:
+[18.0, 15.0, 19.0, 20.0]
+[18.0, 15.0, 19.0, 20.0]
+[18.0, 15.0, 19.0, 20.0]
+[18.0, 15.0, 19.0, 20.0]
+[18.0, 15.0, 19.0, 20.0]
 ```
 
 ---
@@ -205,13 +234,17 @@ that produced it:
 
 | # | Criterion | Target | Verdict | How I decided |
 |---|---|---|---|---|
-| 1 |  |  |  |  |
-| 2 |  |  |  |  |
-| 3 |  |  |  |  |
-| 4 |  |  |  |  |
-| 5 |  |  |  |  |
+| 1 | Matching query completes all three tools | 4 of 5 | MET (5/5) | All five runs showed `search_listings`, `suggest_outfit`, and `create_fit_card` completing in order and returning a fit card. |
+| 2 | Impossible query stops before the second tool | 5 of 5 | MET (5/5) | All five runs returned an empty search result, produced the actionable no-match message, and stopped before `suggest_outfit`. |
+| 3 | The selected item persists through session state | 5 of 5 | MET (5/5) | In all five traces, the listing ID stored in `session["selected_item"]` matched the listing ID passed into `suggest_outfit`. |
+| 4 | The fit card includes the find's key details | 4 of 5 | MET (5/5) | All five generated fit cards mentioned both the selected item's $18 price and Depop platform. |
+| 5 | Search respects the maximum price | 5 of 5 | MET (5/5) | Five checks of the MCP search using `max_price=20.0` returned prices `[18.0, 15.0, 19.0, 20.0]`, so every result was at or below the requested maximum. |
 
 **Diagnoses**
+
+No acceptance criterion missed its Unit 3 target, so there is no failed criterion to diagnose. The deterministic search, branch, and session-state criteria were stable across all five tries, while the two model-generated tools varied in wording without violating the criteria.
+
+Criterion 4 is the criterion I would tighten first because its 4-of-5 target allows one generated fit card to omit a key detail. It is also the criterion most exposed to nondeterministic model output, so strengthening how `create_fit_card` asks for the price and platform gives us a meaningful change to measure without altering the acceptance criterion itself.
 
 
 
