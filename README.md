@@ -231,20 +231,29 @@ that produced it:
 
 **Happy path**
 
-```
-
+```text
+[1] search_listings (via MCP)
+      in:  dict with keys: description, size, max_price
+      out: 10 items: Y2K Baby Tee — Butterfly Print, Graphic Tee — 2003 Tour Bootleg Style, Vintage Band Tee — Faded Grey … +7 more
+      →    match found, continuing
+[2] suggest_outfit
+      in:  dict with keys: new_item, wardrobe
+      out: **Outfit 1: Y2K Streetwear Edge** *   **Thrifted item:** Y2K Baby Tee — Butterfly Print *   **Existing pieces:…
+[3] create_fit_card
+      in:  dict with keys: outfit, new_item
+      out: Scored this adorable Y2K Baby Tee — Butterfly Print on Depop for just $18.00 and I am completely obsessed! Sty…
 ```
 
 **Empty search**
 
+```text
+[1] search_listings (via MCP)
+      in:  dict with keys: description, size, max_price
+      out: [] (empty)
+      →    branch: empty, stopping
 ```
 
-```
-
-**On the MCP move:** <!-- what changed in your code, and whether anything
-behaved differently afterwards. If the rewire didn't work, say exactly where it
-broke — the error text and the last thing that worked. That earns the point in
-full. -->
+**On the MCP move:** I moved `search_listings` behind MCP by registering it in `mcp_server.py` and replacing the direct function call in `run_agent()` with `mcp_client.call_tool()`. The agent’s behavior did not change after the rewire: the same matching query still selected the same listing and continued through the outfit and fit-card steps. The trace now shows `search_listings (via MCP)` explicitly, while the empty-search trace stops after that first step.
 
 
 
