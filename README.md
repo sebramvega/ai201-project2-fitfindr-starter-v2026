@@ -150,6 +150,13 @@ Scored these vintage Levi's 501 jeans for just $38.00 on Depop and I'm honestly 
 - **What I asked for:** I used AI to help build and debug the planning loop that parses the user's query, stores tool results in session state, and stops when the search returns no matches.
 - **What came back:** The loop used regular expressions to extract size and maximum price, stored the parsed values and tool results in the session, and branched on whether `search_listings` returned any results.
 - **What I changed:** During testing, my first price-parsing test returned `None` because PowerShell expanded `$30` before Python received the query. I reran the test with the dollar sign escaped and confirmed the parser returned `30.0`. I also tested the impossible-query path separately and confirmed that `selected_item`, `outfit_suggestion`, and `fit_card` remain `None` when the search returns an empty list.
+
+**Moment 3**
+
+- **What I asked for:** I used AI while setting up the Unit 4 evaluation to map my five precommitted acceptance criteria to concrete test scenarios, interpret the repeated run logs, and identify one targeted change to measure.
+- **What came back:** The evaluation ran each criterion five times with caching disabled. All five criteria met their original targets in the before run. I then tightened the `create_fit_card` prompt to make the required price and platform details more explicit.
+- **What I changed:** I kept the original criteria and targets unchanged, made only the single prompt change, and ran the full evaluation again. The after run remained 5/5 on Criterion 4, so the change did not improve the measured score. One generated response also exposed a checklist in the caption, which I recorded as a remaining output-quality issue rather than tuning it away.
+
 <!-- ═══════════════════════ UNIT 4 — THE TEST ═══════════════════════
 
      Don't fill these in during unit 3.
@@ -299,25 +306,21 @@ Criterion 4 is the criterion I would tighten first because its 4-of-5 target all
 
      `python run_eval.py --label after` -->
 
-**What I changed:**
+**What I changed:** I tightened the prompt in `create_fit_card` so the selected item's exact name, formatted price, and platform are listed as explicit required details. I also asked the model to check that the price and platform were present before answering.
 
-**Which failure it was meant to fix:**
+**Which failure it was meant to fix:** No acceptance criterion missed its target in the before run. I chose Criterion 4 because it is the criterion most exposed to nondeterministic model output, and its original 4-of-5 target allows one fit card to omit a required detail. The change was intended to make inclusion of the price and platform more robust without changing the criterion itself.
 
 ### Run Log — After
 
 | Criterion | Target | Try 1 | Try 2 | Try 3 | Try 4 | Try 5 | Verdict |
 |---|---|---|---|---|---|---|---|
-| 1.  |  |  |  |  |  |  |  |
-| 2.  |  |  |  |  |  |  |  |
-| 3.  |  |  |  |  |  |  |  |
-| 4.  |  |  |  |  |  |  |  |
-| 5.  |  |  |  |  |  |  |  |
+| 1. Matching query completes all three tools | 4 of 5 | PASS | PASS | PASS | PASS | PASS | MET (5/5) |
+| 2. Impossible query stops before the second tool | 5 of 5 | PASS | PASS | PASS | PASS | PASS | MET (5/5) |
+| 3. The selected item persists through session state | 5 of 5 | PASS | PASS | PASS | PASS | PASS | MET (5/5) |
+| 4. The fit card includes the find's key details | 4 of 5 | PASS | PASS | PASS | PASS | PASS | MET (5/5) |
+| 5. Search respects the maximum price | 5 of 5 | PASS | PASS | PASS | PASS | PASS | MET (5/5) |
 
-**Did it help, and how do I know:**
-
-<!-- If it made things worse, say that. Honestly reported, that earns full
-     credit and is more interesting than one that worked. -->
-
+**Did it help, and how do I know:** The change did not improve the measured Criterion 4 score because the before run was already 5/5 and the after run was also 5/5. It therefore provided no measurable improvement against the existing acceptance criterion. It also revealed a tradeoff: one after-run response included a meta checklist before the caption instead of returning only the requested social-post text. The stronger instruction improved explicitness but made that response less natural, so I would revise the prompt differently in a future iteration rather than claiming this change was an improvement.
 
 
 ---
@@ -328,7 +331,11 @@ Criterion 4 is the criterion I would tighten first because its 4-of-5 target all
      you did. "I ran out of time" is fine if it's true. Pretending nothing is
      left is not. -->
 
+No acceptance criterion remained missed after the second evaluation. All five criteria met their original Unit 3 targets in both the before and after runs.
 
+The main issue I would investigate next is output quality in `create_fit_card`. The tightened prompt preserved the required price and platform details, but one after-run response exposed the model's internal-style checklist in the final output. I would next change the prompt so the model performs the requirement check silently and returns only the finished caption, then measure that behavior with a separate criterion specifically covering caption format.
+
+I stopped here because Unit 4 requires one measured improvement rather than repeatedly tuning until every output looks ideal. The before/after experiment already showed that the chosen change did not improve the existing score and introduced a new quality tradeoff.
 
 <!-- ═════════════════════════════════════════════════════════════════════
 

@@ -250,9 +250,13 @@ def create_fit_card(outfit: str, new_item: dict) -> str:
         f"Thrifted item: {item_details}\n\n"
         f"Outfit suggestion:\n{outfit}\n\n"
         "Write a two-to-four sentence caption someone would actually post "
-        "about this thrift find. Mention the item's name, price, and platform "
-        "once each, and describe the specific vibe of the outfit. "
-        "Make it sound like a social post rather than a product description."
+        "about this thrift find. The caption MUST include all of these details:\n"
+        f"- item name: {new_item['title']}\n"
+        f"- exact price: ${new_item['price']:.2f}\n"
+        f"- platform: {new_item['platform']}\n"
+        "Mention each once, describe the specific vibe of the outfit, and make it "
+        "sound like a social post rather than a product description. "
+        "Before answering, check that the caption includes the price and platform."
     )
 
     return generate(prompt)
