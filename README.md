@@ -293,6 +293,32 @@ Criterion 4 is the criterion I would tighten first because its 4-of-5 target all
       →    branch: empty, stopping
 ```
 
+**Failure modes deliberately triggered**
+
+**Empty search**
+
+```text
+I couldn't find a matching item. Try increasing your budget, changing the size, or using a broader description.
+```
+
+The search returned `[]`, the loop stopped before `suggest_outfit`, and there were 0 model calls.
+
+**Empty wardrobe**
+
+```text
+Since your wardrobe is currently empty, here are two easy, versatile ways to style this Y2K baby tee:
+```
+
+The agent continued with general styling advice rather than crashing or returning an empty string, and it still produced a fit card.
+
+**Model unavailable**
+
+```text
+ModelUnavailable: The model rejected your API key. Check GEMINI_API_KEY in your .env file, or create a fresh key at aistudio.google.com.
+```
+
+I triggered this by changing one character of the API key temporarily. The application returned an actionable message instead of hanging or displaying a raw traceback, and I restored the key immediately afterward.
+
 **On the MCP move:** I moved `search_listings` behind MCP by registering it in `mcp_server.py` and replacing the direct function call in `run_agent()` with `mcp_client.call_tool()`. The agent’s behavior did not change after the rewire: the same matching query still selected the same listing and continued through the outfit and fit-card steps. The trace now shows `search_listings (via MCP)` explicitly, while the empty-search trace stops after that first step.
 
 
